@@ -3,7 +3,7 @@ package com.movie.recommendations.controller;
 import com.movie.recommendations.model.MoodEntry;
 import com.movie.recommendations.repo.MoodEntryRepository;
 import com.movie.recommendations.service.MoodAnalyzerService;
-import com.movie.recommendations.provider.MovieProviderService;
+import com.movie.recommendations.service.MovieProviderService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
