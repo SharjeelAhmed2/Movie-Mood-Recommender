@@ -22,23 +22,28 @@ public class RecommendationController {
     }
 
     @PostMapping("/recommend")
-    public Map<String, Object> recommend(@RequestBody Map<String, String> payload) {
-        String moodText = payload.getOrDefault("moodText", "");
-        String tag = moodAnalyzer.classify(moodText);
-        Map<String, String> movie = movieProvider.pickForTag(tag);
+    public Map<String, Object> recommend(
+            @RequestBody Map<String, String> payload,
+            @RequestParam(defaultValue = "1") int count) {   // ➊ add this line
 
-        // persist log
-        MoodEntry entry = new MoodEntry();
-        entry.setMoodText(moodText);
-        entry.setMoodTag(tag);
-        entry.setMovieId(movie.get("id"));
-        entry.setMovieTitle(movie.get("title"));
-        repo.save(entry);
+        String moodText = payload.getOrDefault("moodText", "");
+        String tag      = moodAnalyzer.classify(moodText);
+
+        var movies = movieProvider.pickBatch(tag, count);    // ➋ batch call
+
+        movies.forEach(m -> {                                // ➌ log each pick
+            MoodEntry e = new MoodEntry();
+            e.setMoodText(moodText);
+            e.setMoodTag(tag);
+            e.setFilmKey(m.id());
+            e.setMovieTitle(m.title());
+            repo.save(e);
+        });
 
         return Map.of(
                 "moodTag", tag,
-                "movie", movie,
-                "quip", "Lila says: cue the popcorn & press play 🍿"
+                "movies", movies,
+                "quip", "Lila says: binge responsibly 🍿"
         );
     }
 }
