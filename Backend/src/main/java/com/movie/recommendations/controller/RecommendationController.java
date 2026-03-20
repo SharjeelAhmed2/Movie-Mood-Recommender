@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173/")
 public class RecommendationController {
 
     private final MoodAnalyzerService moodAnalyzer;
@@ -29,8 +30,8 @@ public class RecommendationController {
         String moodText = payload.getOrDefault("moodText", "");
         String tag      = moodAnalyzer.classify(moodText);
 
-        var movies = movieProvider.pickBatch(tag, count);    // ➋ batch call
-
+        //var movies = movieProvider.pickBatch(tag, count);    // ➋ batch call
+        var movies = movieProvider.pickBatch(tag, count);
         movies.forEach(m -> {                                // ➌ log each pick
             MoodEntry e = new MoodEntry();
             e.setMoodText(moodText);

@@ -69,5 +69,15 @@ public class MoodEntry {
     private String movieId;
     private String movieTitle;
 
+    public String getFilmKey() {
+        return filmKey;
+    }
+
+    public void setFilmKey(String filmKey) {
+        this.filmKey = filmKey;
+    }
+
+    private String filmKey;
+
     // ---- getters & setters (boilerplate) ----
 }
