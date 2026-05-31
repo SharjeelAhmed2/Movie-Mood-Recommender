@@ -13,7 +13,7 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/recommend?count=${count}`, {
+      const res = await fetch(`http://localhost:8080/recommend?count=${count}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ moodText: mood }),

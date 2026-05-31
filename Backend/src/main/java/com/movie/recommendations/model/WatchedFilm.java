@@ -15,6 +15,40 @@ public class WatchedFilm {
     @Column(unique = true, nullable = false)
     private String filmKey;
 
+    // NEW fields we hydrate once at sync-time
+    private String title;
+
+    private Integer  year;
+    private String posterUrl;
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public String getPosterUrl() {
+        return posterUrl;
+    }
+
+    public void setPosterUrl(String posterUrl) {
+        this.posterUrl = posterUrl;
+    }
+
     public UUID getId() {
         return id;
     }

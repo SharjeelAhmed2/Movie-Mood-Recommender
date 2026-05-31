@@ -1,6 +1,7 @@
 package com.movie.recommendations.provider;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.movie.recommendations.provider.dto.MovieDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -49,5 +50,20 @@ public class TmdbProvider {
                 pick.get("title").asText(),
                 Integer.parseInt(pick.get("release_date").asText().substring(0, 4)),
                 "https://image.tmdb.org/t/p/w500" + pick.get("poster_path").asText());
+    }
+    public MovieDto pickById(String tmdbId) {
+        String url = "https://api.themoviedb.org/3/movie/" + tmdbId +
+                "?api_key=" + apiKey + "&language=en-US";
+
+        try {
+            var node = rest.getForObject(url, JsonNode.class);
+            return new MovieDto(
+                    node.get("id").asText(),
+                    node.get("title").asText(),
+                    Integer.parseInt(node.get("release_date").asText().substring(0,4)),
+                    "https://image.tmdb.org/t/p/w500" + node.get("poster_path").asText());
+        } catch (Exception e) {
+            return null;   // not found or slug, caller will handle
+        }
     }
 }

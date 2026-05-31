@@ -3,6 +3,8 @@ package com.movie.recommendations.sync;
 // src/main/java/com/example/moodrecommender/sync/LetterboxdSyncService.java
 
 import com.movie.recommendations.model.WatchedFilm;
+import com.movie.recommendations.provider.TmdbProvider;
+import com.movie.recommendations.provider.dto.MovieDto;
 import com.movie.recommendations.repo.WatchedFilmRepository;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
@@ -19,14 +21,16 @@ public class LetterboxdSyncService {
 
     private final WatchedFilmRepository watchedRepo;
 
+    private final TmdbProvider tmdbProvider;
     // namespaces we need
     private static final Namespace LB_NS   =
             Namespace.getNamespace("letterboxd", "https://letterboxd.com/");
     private static final Namespace TMDB_NS =
             Namespace.getNamespace("tmdb", "https://themoviedb.org/");
 
-    public LetterboxdSyncService(WatchedFilmRepository repo) {
+    public LetterboxdSyncService(WatchedFilmRepository repo, TmdbProvider tmdbProvider) {
         this.watchedRepo = repo;
+        this.tmdbProvider = tmdbProvider;
     }
 
     public int refresh(String username) throws Exception {
@@ -53,14 +57,29 @@ public class LetterboxdSyncService {
                 filmKey = link.replaceAll(".*/film/(.*?)/?$", "$1"); // “lost-in-translation”
             }
 
-            /* ---------- 3️⃣  save if unseen ---------- */
+            /* ---------- 3️⃣  save if unseen (now HYDRATED) ---------- */
             if (!watchedRepo.existsByFilmKey(filmKey)) {
+
+                // ➊  try to fetch full details from TMDB by ID
+                MovieDto dto = null;
+                if (filmKey.matches("\\d+")) {                   // only if it’s numeric
+                    dto = tmdbProvider.pickById(filmKey);        // add this helper in TmdbProvider
+                }
+
+                // ➋  build entity
                 WatchedFilm w = new WatchedFilm();
                 w.setFilmKey(filmKey);
                 w.setWatchedAt(
                         entry.getPublishedDate() != null
                                 ? entry.getPublishedDate().toInstant().atOffset(ZoneOffset.UTC)
                                 : OffsetDateTime.now());
+
+                if (dto != null) {                              // hydrate when lookup succeeded
+                    w.setTitle(dto.title());
+                    w.setYear(dto.year());
+                    w.setPosterUrl(dto.posterUrl());
+                }
+
                 watchedRepo.save(w);
                 newCount++;
             }
